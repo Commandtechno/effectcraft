@@ -733,6 +733,38 @@ fn shape_pen_draws_a_closed_shape_layer() {
     assert_eq!(sp.vertices.len(), 4);
 }
 
+/// Switching from the Pen to the Hand (and clicking with it) and back keeps the path in progress:
+/// the next Pen click continues it instead of starting a new one, and the layer stays selected.
+#[test]
+fn pen_path_survives_a_trip_to_the_hand_tool() {
+    let mut h = harness();
+    let plate = layer_id(&h, "Plate");
+    h.state_mut().session.execute("layer.select", json!({"layers": [plate]})).unwrap();
+    h.state_mut().session.execute("view.snapping", json!({"value": false})).unwrap();
+    h.state_mut().ui.tool = Tool::Pen;
+    h.run_steps(2);
+    for p in [[100.0, 60.0], [500.0, 60.0]] {
+        let at = screen(&h, p);
+        click(&mut h, at);
+    }
+    h.state_mut().ui.tool = Tool::Hand;
+    h.run_steps(2);
+    // On the pasteboard, where a Selection click would deselect all.
+    let at = screen(&h, [-20.0, 200.0]);
+    assert!(rect(&h, "viewer.area").contains(at));
+    click(&mut h, at);
+    assert_eq!(h.state().session.state.selected_layers, vec![LayerId(plate)], "a Hand click deselects nothing");
+    h.state_mut().ui.tool = Tool::Pen;
+    h.run_steps(2);
+    let at = screen(&h, [500.0, 300.0]);
+    click(&mut h, at);
+    let l = h.state().session.active_comp().unwrap().layers.iter().find(|l| l.name == "Plate").unwrap().clone();
+    assert_eq!(l.masks().unwrap().groups().count(), 1, "no second mask");
+    let sp = mask_path(&h, "Plate");
+    assert_eq!(sp.vertices.len(), 3, "{sp:?}");
+    assert!(!sp.closed);
+}
+
 #[test]
 fn motion_path_key_drag_edits_that_key() {
     let mut h = harness();
