@@ -80,14 +80,17 @@ pub fn vr_editor(app: &mut EffectcraftApp, ui: &mut egui::Ui, rect: Rect) {
     }
     let mut acts = vec![];
     ui.label(RichText::new(tr("VR Environments")).strong());
-    for e in &envs {
-        let out = e["output"].as_u64().unwrap_or(0);
-        let r = ui.selectable_label(out == sel, e["name"].as_str().unwrap_or(""));
-        app.auto.add(&format!("vrEditor.env.{out}"), r.rect, e["name"].as_str().unwrap_or(""));
-        if r.clicked() {
-            sel = out;
+    // Full-width rows: the whole line picks the environment, not only its name.
+    ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| {
+        for e in &envs {
+            let out = e["output"].as_u64().unwrap_or(0);
+            let r = ui.selectable_label(out == sel, e["name"].as_str().unwrap_or(""));
+            app.auto.add(&format!("vrEditor.env.{out}"), r.rect, e["name"].as_str().unwrap_or(""));
+            if r.clicked() {
+                sel = out;
+            }
         }
-    }
+    });
     ui.data_mut(|d| d.insert_temp(sel_id, sel));
     let Some(env) = envs.iter().find(|e| e["output"] == sel) else { return };
     ui.separator();

@@ -181,9 +181,10 @@ pub fn panel_menu_popup(app: &mut EffectcraftApp, ui: &mut egui::Ui) {
         return;
     }
     let mut close = false;
-    let area = egui::Area::new(id.with("area")).order(egui::Order::Foreground).fixed_pos(pos).show(ui.ctx(), |ui| {
+    let area = crate::widgets::menu_area(ui.ctx(), id.with("area"), pos).show(ui.ctx(), |ui| {
         egui::Frame::popup(ui.style()).show(ui, |ui| {
             ui.set_min_width(200.0);
+            crate::widgets::menu_style(ui.style_mut());
             if ui.button(tr("Close Panel")).clicked() {
                 let _ = app.dock_command(ui.ctx(), craft_ui::docking::Action::Close { panel });
                 close = true;

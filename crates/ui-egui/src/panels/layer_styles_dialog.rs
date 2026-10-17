@@ -180,7 +180,8 @@ pub fn show(app: &mut EffectcraftApp, ctx: &egui::Context, t: &Tokens) {
                             } else {
                                 ui.add_space(24.0);
                             }
-                            let r = ui.selectable_label(sel == id, name);
+                            // The whole rest of the row picks the style, not only its name.
+                            let r = ui.add(egui::Button::selectable(sel == id, name).min_size(egui::vec2(ui.available_width(), 0.0)));
                             if r.clicked() {
                                 app.dialog_state.layer_style.selected = id.to_string();
                             }
