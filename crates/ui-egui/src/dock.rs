@@ -52,10 +52,12 @@ pub enum PanelKind {
     CreateNullsFromPaths,
     /// Window ▸ VR Comp Editor (our own panel).
     VrCompEditor,
+    /// Window ▸ Motion Tools (our own panel: ease curves, anchor grid and motion rigs).
+    MotionTools,
 }
 
 impl PanelKind {
-    pub const ALL: [PanelKind; 34] = [
+    pub const ALL: [PanelKind; 35] = [
         PanelKind::Project,
         PanelKind::EffectControls,
         PanelKind::Composition,
@@ -90,6 +92,7 @@ impl PanelKind {
         PanelKind::ContentAwareFill,
         PanelKind::CreateNullsFromPaths,
         PanelKind::VrCompEditor,
+        PanelKind::MotionTools,
     ];
     pub fn title(self) -> &'static str {
         match self {
@@ -129,6 +132,7 @@ impl PanelKind {
             PanelKind::ContentAwareFill => "Content-Aware Fill",
             PanelKind::CreateNullsFromPaths => "Create Nulls From Paths",
             PanelKind::VrCompEditor => "VR Comp Editor",
+            PanelKind::MotionTools => "Motion Tools",
         }
     }
     pub fn id(self) -> String {
@@ -323,7 +327,11 @@ pub fn workspace(name: &str) -> DockNode {
             hsplit(
                 FixedA(300.0),
                 tabs(&[Project, EffectControls], 1),
-                hsplit(FixedB(300.0), tabs(&[Composition, Layer], 0), right(&[Info, Preview, Audio], &[EffectsPresets, Smoother, Wiggler, MotionSketch])),
+                hsplit(
+                    FixedB(300.0),
+                    tabs(&[Composition, Layer], 0),
+                    right(&[Info, Preview, Audio], &[EffectsPresets, MotionTools, Smoother, Wiggler, MotionSketch]),
+                ),
             ),
             tabs(&[Timeline, RenderQueue], 0),
         ),
@@ -430,6 +438,7 @@ pub fn workspace(name: &str) -> DockNode {
                             ContentAwareFill,
                             CreateNullsFromPaths,
                             VrCompEditor,
+                            MotionTools,
                         ],
                     ),
                 ),

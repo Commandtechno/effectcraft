@@ -559,6 +559,88 @@ impl Default for AnimToolsState {
     }
 }
 
+/// Window ▸ Motion Tools settings: the ease curve, the current tool and each tool's options (the
+/// parameters of the `motion.*` commands the panel runs).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct MotionToolsState {
+    /// The ease curve (`motion.ease`): influences in percent, speeds relative to the segment's
+    /// average (1 = linear, 0 = eased to a stop, negative = overshoot).
+    pub out_influence: f64,
+    pub out_speed: f64,
+    pub in_influence: f64,
+    pub in_speed: f64,
+    /// The graph shows speed instead of value (display only; edit in the value graph).
+    pub speed_graph: bool,
+    /// Apply the curve to the selected keyframes whenever it is edited or a preset is picked.
+    pub auto_apply: bool,
+    /// The tool whose options show: null|build|dynamics|delay|falloff|clone|spin|stare.
+    pub tool: String,
+    /// Build: fade|scale|slide|rotate, in|out|both, length in frames, slide direction.
+    pub build_kind: String,
+    pub build_mode: String,
+    pub build_frames: f64,
+    pub build_from: String,
+    /// Dynamics: elastic|bounce, amplitude (% of the move), swings per second, decay (%).
+    pub dyn_mode: String,
+    pub dyn_amplitude: f64,
+    pub dyn_frequency: f64,
+    pub dyn_decay: f64,
+    /// Delay: frames per layer, selection|reverse, auto|keys|layers.
+    pub delay_frames: f64,
+    pub delay_order: String,
+    pub delay_what: String,
+    /// Falloff: scale|opacity|rotation|scale+opacity, radius and feather (px), invert.
+    pub falloff_props: String,
+    pub falloff_radius: f64,
+    pub falloff_feather: f64,
+    pub falloff_invert: bool,
+    /// Clone: copies, position offset per copy, frames per copy.
+    pub clone_count: f64,
+    pub clone_offset: [f64; 2],
+    pub clone_frames: f64,
+    /// Spin: degrees per second.
+    pub spin_speed: f64,
+    /// Stare: the target layer and an angle offset.
+    pub stare_target: Option<u64>,
+    pub stare_offset: f64,
+}
+
+impl Default for MotionToolsState {
+    fn default() -> Self {
+        MotionToolsState {
+            out_influence: 100.0 / 3.0,
+            out_speed: 0.0,
+            in_influence: 100.0 / 3.0,
+            in_speed: 0.0,
+            speed_graph: false,
+            auto_apply: false,
+            tool: "build".into(),
+            build_kind: "fade".into(),
+            build_mode: "in".into(),
+            build_frames: 12.0,
+            build_from: "bottom".into(),
+            dyn_mode: "elastic".into(),
+            dyn_amplitude: 30.0,
+            dyn_frequency: 3.0,
+            dyn_decay: 50.0,
+            delay_frames: 2.0,
+            delay_order: "selection".into(),
+            delay_what: "auto".into(),
+            falloff_props: "scale".into(),
+            falloff_radius: 200.0,
+            falloff_feather: 200.0,
+            falloff_invert: false,
+            clone_count: 3.0,
+            clone_offset: [50.0, 0.0],
+            clone_frames: 0.0,
+            spin_speed: 90.0,
+            stare_target: None,
+            stare_offset: 0.0,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UiState {
     pub tool: Tool,
@@ -685,6 +767,9 @@ pub struct UiState {
     /// Wiggler / Smoother / Motion Sketch settings.
     #[serde(default)]
     pub anim_tools: AnimToolsState,
+    /// Window ▸ Motion Tools settings.
+    #[serde(default)]
+    pub motion_tools: MotionToolsState,
     /// Composition Mini-Flowchart popup position (open when set).
     #[serde(default)]
     pub mini_flowchart: Option<[f32; 2]>,
@@ -749,6 +834,7 @@ impl Default for UiState {
             layer_zoom: None,
             layer_pan: [0.0, 0.0],
             anim_tools: AnimToolsState::default(),
+            motion_tools: MotionToolsState::default(),
             mini_flowchart: None,
             flowchart: Default::default(),
             scopes: Default::default(),

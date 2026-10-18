@@ -241,8 +241,15 @@ fn set_transform(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 fn center_anchor(s: &mut Session, p: &Value) -> Result<Value> {
+    anchor_to(s, p, 0.5, 0.5, "Center Anchor Point", "layer.centerAnchor")
+}
+
+/// Move the Anchor Point of `layers` (else the selected ones) to the point at fractions `fx`,
+/// `fy` of each layer's content bounds (0.5, 0.5: the centre), shifting Position so the layers
+/// don't move.
+pub(crate) fn anchor_to(s: &mut Session, p: &Value, fx: f64, fy: f64, label: &str, cmd: &str) -> Result<Value> {
     let (cid, ids) = layers_p(s, p)?;
-    let ids = super::unlocked(s, cid, ids, "layer.centerAnchor")?;
+    let ids = super::unlocked(s, cid, ids, cmd)?;
     let t = s.time();
     let comp = s.project.comp(cid).ok_or(EngineError::NoComp)?;
     let ctx = effectcraft_render::EvalCtx::new(&s.project, cid, comp, t);
@@ -250,10 +257,10 @@ fn center_anchor(s: &mut Session, p: &Value) -> Result<Value> {
     for lid in &ids {
         let Some(l) = comp.layer(*lid) else { continue };
         if let Some([x0, y0, x1, y1]) = effectcraft_render::content_bounds(&ctx, l) {
-            centers.push((*lid, [(x0 + x1) / 2.0, (y0 + y1) / 2.0]));
+            centers.push((*lid, [x0 + (x1 - x0) * fx, y0 + (y1 - y0) * fy]));
         }
     }
-    s.edit("Center Anchor Point", None, |proj, _| {
+    s.edit(label, None, |proj, _| {
         for (lid, c) in &centers {
             let l = layer_mut(proj, cid, *lid)?;
             let lt = l.layer_time(t);

@@ -641,6 +641,31 @@ Extension points and the bundled extensions: [plugins.md](plugins.md).
 * `effect.plugins.load {"path": "x.wasm"}` / `effect.plugins.list`: WebAssembly effect plug-ins
   ([plugins.md](plugins.md)), then `effect.apply` by id like a built-in.
 
+### Motion Tools (ease curves and motion rigs)
+
+Window ▸ Motion Tools is a one-panel motion-design toolkit; every button is a `motion.*` command,
+each one undo step:
+
+* `motion.ease {preset?, outInfluence?, outSpeed?, inInfluence?, inSpeed?}` gives the selected
+  keyframes' segments a normalised curve (influences in %, speeds relative to the segment's average:
+  1 = linear, 0 = eased to a stop, negative = overshoot). Presets: `linear`, `easeIn`, `easeOut`,
+  `easy`, `smooth`, `strong`, `snap`, `anticipate`, `back`. `motion.readEase` reads it back.
+* `motion.anchor {x, y}` moves the anchor point to a point of the content bounds (0 / 0.5 / 1)
+  without moving the layer.
+* `motion.null` parents the selected layers to a null at their centre.
+* `motion.build {kind: fade|scale|slide|rotate, mode: in|out|both, frames, from?}` keys a build at
+  the layers' In / Out points, eased with the curve parameters.
+* `motion.dynamics {mode: elastic|bounce, amplitude %, frequency, decay %, count}` adds swings
+  after each selected key that ends a move.
+* `motion.delay {frames, order?: selection|reverse, what?: auto|keys|layers}` staggers keys or
+  layers per layer.
+* `motion.falloff {props: [scale|opacity|rotation], radius, feather, invert?}`, `motion.spin
+  {speed}` and `motion.stare {target, offset?}` rig expressions (with Slider Controls you can
+  animate); `motion.clone {count, offset: [x, y], frames}` duplicates with offsets.
+* The panel's settings are `ui.set {"motionTools": {…}}` (fields of `MotionToolsState`); its
+  automation ids start with `motionTools.` (`motionTools.tool.<id>`, `motionTools.preset.<id>`,
+  `motionTools.anchor.topLeft`, `motionTools.apply`…).
+
 ## CLI
 
 Each invocation runs a headless engine with no window. It opens the demo project unless you pass
