@@ -94,7 +94,7 @@ fn batch(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 /// Fold the undo steps recorded since the project was `snap` into one step called `label`.
-fn fold(s: &mut Session, snap: &Arc<effectcraft_project::Project>, label: &str) {
+pub(crate) fn fold(s: &mut Session, snap: &Arc<effectcraft_project::Project>, label: &str) {
     let h = &mut s.history;
     let Some(start) = h.undo.iter().rposition(|(_, p)| Arc::ptr_eq(p, snap)) else { return };
     let first = h.undo[start].1.clone();

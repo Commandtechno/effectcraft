@@ -1228,6 +1228,7 @@ Window
   ---
   Create Nulls From Paths | window.panel {"panel":"createNullsFromPaths"}
   VR Comp Editor | window.panel {"panel":"vrCompEditor"}
+  Motion Tools | window.panel {"panel":"motionTools"}
   @dynamic:scriptPanels
 Help
   EffectCraft Help... | help.docs {"page":"help"} | F1

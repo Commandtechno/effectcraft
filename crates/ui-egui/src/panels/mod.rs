@@ -30,6 +30,7 @@ pub mod learn;
 pub mod markers_ui;
 pub mod media_panels;
 pub mod misc;
+pub mod motion_tools;
 pub mod object_matte_tool;
 pub mod paint_panels;
 pub mod panel_kit;
@@ -169,6 +170,7 @@ pub fn show(app: &mut EffectcraftApp, ui: &mut egui::Ui, p: PanelKind, rect: Rec
         PanelKind::ContentAwareFill => content_fill_panel::show(app, ui, rect),
         PanelKind::CreateNullsFromPaths => path_vr_panels::create_nulls(app, ui, rect),
         PanelKind::VrCompEditor => path_vr_panels::vr_editor(app, ui, rect),
+        PanelKind::MotionTools => motion_tools::show(app, ui, rect),
     }
 }
 

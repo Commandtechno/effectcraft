@@ -295,6 +295,17 @@ pub fn handle(app: &mut EffectcraftApp, ctx: &egui::Context, req: &ControlReques
                     Err(e) => return err(format!("animTools: {e}")),
                 }
             }
+            // Motion Tools settings (fields of `MotionToolsState`).
+            if let Some(Value::Object(m)) = p.get("motionTools") {
+                let mut cur = serde_json::to_value(&app.ui.motion_tools).unwrap_or_default();
+                for (k, v) in m {
+                    cur[k] = v.clone();
+                }
+                match serde_json::from_value(cur) {
+                    Ok(v) => app.ui.motion_tools = v,
+                    Err(e) => return err(format!("motionTools: {e}")),
+                }
+            }
             if let Some(b) = p.get("home").and_then(Value::as_bool) {
                 app.ui.start_screen = b;
             }
