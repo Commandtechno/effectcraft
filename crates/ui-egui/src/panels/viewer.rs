@@ -982,10 +982,10 @@ pub fn show(app: &mut EffectcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let mut motion_frames: Vec<ov::PathFrame> = Vec::new();
     let mut paths: Vec<ov::PathInfo> = Vec::new();
     let sel_vertices = app.session.state.selected_vertices.clone();
-    // Pen path in progress ends when the tool changes or its mask is gone; Esc / Enter also end
-    // free transform.
+    // Pen path in progress ends when the tool changes (the view-only Hand and Zoom keep it, so
+    // the Pen continues it on return) or its mask is gone; Esc / Enter also end free transform.
     let finish = ui.input(|i| i.key_pressed(egui::Key::Escape) || i.key_pressed(egui::Key::Enter)) && !ctx.egui_wants_keyboard_input();
-    if app.ui.tool != Tool::Pen || finish {
+    if !matches!(app.ui.tool, Tool::Pen | Tool::Hand | Tool::Zoom) || finish {
         ui.data_mut(|d| d.remove::<(LayerId, u64)>(pen_id()));
     }
     if finish || app.ui.tool != Tool::Selection {
@@ -1004,7 +1004,7 @@ pub fn show(app: &mut EffectcraftApp, ui: &mut egui::Ui, rect: Rect) {
             ov::motion_path(app, &painter, &map, &ectx, l, col, &mut key_hits, &mut motion_frames);
             // Masks and shape paths.
             if app.ui.viewer.show_masks {
-                let pen = ui.data(|d| d.get_temp::<(LayerId, u64)>(pen_id()));
+                let pen = ui.data(|d| d.get_temp::<(LayerId, u64)>(pen_id())).filter(|_| app.ui.tool == Tool::Pen);
                 let hover = ui.input(|i| i.pointer.hover_pos());
                 ov::draw_paths(app, &painter, &map, &ectx, l, col, &sel_vertices, pen, hover, &mut vertex_hits, &mut vertex_marks, &mut paths);
             }
@@ -1891,7 +1891,7 @@ pub fn show(app: &mut EffectcraftApp, ui: &mut egui::Ui, rect: Rect) {
                 app.ui.viewer.zoom = Some(nz);
                 app.ui.viewer.pan = [pan.x, pan.y];
             }
-            Tool::Type | Tool::TypeVertical => {}
+            Tool::Hand | Tool::Type | Tool::TypeVertical => {}
             Tool::Pen | Tool::MaskFeather => {}
             // On a motion path (After Effects): Add Vertex adds a keyframe where it is clicked,
             // Delete Vertex removes the keyframe, Convert Vertex switches it between Linear and
