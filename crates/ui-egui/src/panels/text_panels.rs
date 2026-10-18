@@ -329,7 +329,7 @@ fn opentype_popup(app: &mut EffectcraftApp, ui: &mut egui::Ui, id: egui::Id, pos
     let has = |tag: &str| feats.iter().any(|f| f == tag);
     let o = doc.opentype;
     let mut rects: Vec<(String, Rect, String)> = vec![];
-    let area = egui::Area::new(id.with("area")).order(egui::Order::Foreground).fixed_pos(pos).show(ui.ctx(), |ui| {
+    let area = crate::widgets::menu_area(ui.ctx(), id.with("area"), pos).show(ui.ctx(), |ui| {
         egui::Frame::popup(ui.style()).show(ui, |ui| {
             ui.set_min_width(230.0);
             ui.label(egui::RichText::new(format!("{} {}", doc.font, doc.style)).small().color(t.text_dim));

@@ -570,7 +570,7 @@ pub fn popup_list<R>(ui: &mut Ui, id: egui::Id, pos: egui::Pos2, anchor: Rect, r
     let est = (rows as f32 * (sp.interact_size.y + sp.item_spacing.y + 4.0) + seps as f32 * (2.0 * sp.item_spacing.y + 2.0) + 16.0).min(max_h + 12.0);
     let pos = egui::pos2(pos.x, pos.y.min(screen.bottom() - est).max(screen.top()));
     let mut chosen = None;
-    let area = egui::Area::new(id.with("area")).order(egui::Order::Foreground).fixed_pos(pos).show(ui.ctx(), |ui| {
+    let area = menu_area(ui.ctx(), id.with("area"), pos).show(ui.ctx(), |ui| {
         egui::Frame::popup(ui.style()).show(ui, |ui| {
             // (An area's content is laid out in last frame's size: ask for the estimate.)
             egui::ScrollArea::vertical().max_height(max_h).min_scrolled_height((est - 16.0).min(max_h)).show(ui, |ui| chosen = body(ui));
@@ -582,6 +582,26 @@ pub fn popup_list<R>(ui: &mut Ui, id: egui::Id, pos: egui::Pos2, anchor: Rect, r
         ui.data_mut(|d| d.insert_temp(id.with("open"), false));
     }
     chosen
+}
+
+/// The foreground area of a hand-drawn popup menu `id` at `pos`. Its rows fill the menu's width
+/// (top-down justified), so a whole row is the click target and highlight, not only its text,
+/// as in egui's own menus; it is measured afresh each time it opens (a sizing pass), as a
+/// justified list keeps last time's width otherwise.
+pub fn menu_area(ctx: &egui::Context, id: egui::Id, pos: egui::Pos2) -> egui::Area {
+    let pass = ctx.cumulative_pass_nr();
+    let key = id.with("shown-pass");
+    let last: Option<u64> = ctx.data_mut(|d| {
+        let last = d.get_temp(key);
+        d.insert_temp(key, pass);
+        last
+    });
+    let was_open = last.is_some_and(|l| l.saturating_add(1) >= pass);
+    if !was_open {
+        // Measure in a discarded pass, so the menu shows laid out from its first frame.
+        ctx.request_discard("popup menu sizing pass");
+    }
+    egui::Area::new(id).order(egui::Order::Foreground).fixed_pos(pos).layout(egui::Layout::top_down_justified(egui::Align::Min)).sizing_pass(!was_open)
 }
 
 /// Custom popup lists also hold the app's keyboard shortcuts while open.

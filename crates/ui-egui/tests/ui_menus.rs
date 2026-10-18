@@ -244,3 +244,29 @@ fn space_previews_after_opening_the_demo_from_home() {
     key(&mut h, Key::Space);
     assert!(h.state().playback.playing, "Space previews the demo (#1059)");
 }
+
+/// A popup list's rows span the whole menu, not just their text: every row is as wide as the
+/// longest, and a click past the end of a short label still chooses it, the first time the
+/// list opens and every time after.
+#[test]
+fn popup_list_rows_fill_the_menu_width() {
+    use effectcraft_ui_egui::state::Resolution;
+    let mut h = harness();
+    for _ in 0..2 {
+        let at = rect(&h, "viewer.resolution").center();
+        click_at(&mut h, at);
+        let (full, custom) = (rect(&h, "viewer.resolutionItem.0"), rect(&h, "viewer.resolutionItem.4"));
+        assert!((full.width() - custom.width()).abs() < 0.5, "Full {full:?} vs Custom… {custom:?}");
+        assert!(full.width() > 100.0, "{full:?}");
+        let at = rect(&h, "viewer.resolutionItem.1").right_center() - vec2(4.0, 0.0);
+        click_at(&mut h, at);
+        assert_eq!(h.state().viewer_res(), Resolution::Half, "a click at the row's end chooses it");
+        // Back to Full for the next round.
+        h.state_mut().session.execute("viewer.resolution", json!({"value": "full"})).ok();
+        let at = rect(&h, "viewer.resolution").center();
+        click_at(&mut h, at);
+        let at = rect(&h, "viewer.resolutionItem.0").right_center() - vec2(4.0, 0.0);
+        click_at(&mut h, at);
+        assert_eq!(h.state().viewer_res(), Resolution::Full);
+    }
+}
